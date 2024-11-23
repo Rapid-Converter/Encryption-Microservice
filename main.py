@@ -12,7 +12,6 @@ async def encrypt_pdf(password: str = Form(...), file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file format. Only .pdf files are allowed.")
 
     try:
-        # Read the uploaded file into memory
         file_data = await file.read()
         reader = PdfReader(io.BytesIO(file_data))
         writer = PdfWriter()
@@ -20,13 +19,11 @@ async def encrypt_pdf(password: str = Form(...), file: UploadFile = File(...)):
         for page in reader.pages:
             writer.add_page(page)
 
-        # Encrypt the PDF in memory
         output_pdf = io.BytesIO()
         writer.encrypt(user_password=password)
         writer.write(output_pdf)
         output_pdf.seek(0)
 
-        # Return the encrypted PDF as a response
         return StreamingResponse(
             output_pdf,
             media_type="application/pdf",
